@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outpost</title>
+</head>
+<body>
+    <h1>hello</h1>
+
+    <script src="dest/outpost.min.js"></script>
+    <script>
+        Outpost.plugin(function(_) {
+            function DOMLang(selector) {
+                if (selector.constructor.name === "String") {
+                    const els = document.querySelectorAll(selector);
+                    for (let i = 0; i < els.length; i++) {
+                        this.push(els[i]);
+                    }
+                } else if (selector.constructor.name === "Array") {
+                    for (let i = 0; i < selector.length; i++) {
+                        this.push(selector[i]);
+                    }
+                } else if (_.isElement(selector)) {
+                    this.push(selector);
+                } else {
+                    throw selector + " is not an element or an array";
+                }
+            }
+
+            DOMLang.prototype = [];
+            DOMLang.prototype.each = function(callback) {
+                for (let i = 0; i < this.length; i++) {
+                    callback(domlang(this[i]), i);
+                }
+            };
+            DOMLang.prototype.text = function(s) {
+                if (this.length === 0) throw "There is no element to get text"
+                if (s === undefined) {
+                    return this[0].textContent;
+                }
+                for (let i = 0; i < this.length; i++) {
+                    this[i].textContent = s;
+                }
+            }
+            
+            const domlang = function(selecor) {
+                return new DOMLang(selecor);
+            };
+            _.domlang = domlang;
+        });
+    </script>
+
+
+    <script>
+        const _ = new Outpost();
+        const tmp = _.toArray({})
+        console.log(tmp);
+    </script>
+</body>
+</html>
