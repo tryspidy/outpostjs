@@ -1,6 +1,6 @@
 ## Quick start
 
-Clone the github repo `git clone https://github.com/tryspidy/outpost.git` and under the `dest` folder, you can find the minified version of the `Outpost`. Add it to your HTML as you would add any JavaScript files or use the `npm` to use it with NodeJS.
+Clone the github repo `git clone https://github.com/tryspidy/outpostjs.git` and under the `dest` folder, you can find the minified version of the `Outpost`. Add it to your HTML as you would add any JavaScript files or use the `npm` to use it with NodeJS.
 
 Or use CDN link
 
@@ -8,9 +8,9 @@ Or use CDN link
 <script src="https://cdn.jsdelivr.net/gh/tryspidy/outpost/dest/outpost.min.js"></script>
 ```
 
-[![Build Status](https://travis-ci.org/tryspidy/outpost.svg?branch=master)](https://travis-ci.org/tryspidy/outpost)
-[![License](https://img.shields.io/github/license/tryspidy/outpost.svg)](https://github.com/tryspidy/outpost/blob/master/LICENSE)
-[![Version](https://img.shields.io/github/release/tryspidy/outpost.svg)](https://github.com/tryspidy/outpost/releases/latest)
+[![Build Status](https://travis-ci.org/tryspidy/outpostjs.svg?branch=master)](https://travis-ci.org/tryspidy/outpostjs)
+[![License](https://img.shields.io/github/license/tryspidy/outpostjs.svg)](https://github.com/tryspidy/outpostjs/blob/master/LICENSE)
+[![Version](https://img.shields.io/github/release/tryspidy/outpostjs.svg)](https://github.com/tryspidy/outpostjs/releases/latest)
 
 
 # Utility Methods
