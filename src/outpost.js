@@ -73,7 +73,7 @@ class Outpost {
     }
     
     isIterable(o) {
-        return !this.isEmpty(o);
+        return typeof o[Symbol.iterator] === 'function';
     }
     
     isSameObject(o1, o2) {
@@ -82,7 +82,7 @@ class Outpost {
     
     escape(s) {
         let newS = s;
-        this.forEach(escapeMap, function(el, key) {
+        this.forEach(this.escapeMap, function(el, key) {
             newS = newS.replace(new RegExp(key, "g"), el);
         });
         return newS;
@@ -90,7 +90,7 @@ class Outpost {
     
     unescape(s) {
         let newS = s;
-        loop(escapeMap, function(el, key) {
+        this.forEach(this.escapeMap, function(el, key) {
             newS = newS.replace(new RegExp(el, "g"), key);
         });
         return newS;
@@ -113,8 +113,9 @@ class Outpost {
     
     isContains(arr, o) {
         let ret = false;
+        const self = this;
         this.forEach(arr, function(el) {
-            if(this.isSameObject(el, o)) {
+            if(self.isEqual(el, o)) {
                 ret = true;
                 return true;
             }
@@ -123,7 +124,7 @@ class Outpost {
     }
     
     random(min, max=null) {
-        if (isArray(min)) {
+        if (this.isArray(min)) {
             let rand = 0 + Math.floor(Math.random() * (min.length));
             return min[rand];
         }
@@ -160,31 +161,47 @@ class Outpost {
     
     
     map(collec, callback) {
-        let newCollec = Object.assign({}, collec);
+        const isArray = this.isArray(collec);
+        const isString = this.isString(collec);
+
+        let newCollec;
+        if (isArray) {
+            newCollec = [];
+        } else if (isString) {
+            newCollec = "";
+        } else {
+            newCollec = Object.assign({}, collec);
+        }
         let keys = this.keys(collec);
         
         for (let i = 0; i < keys.length; i++) {
-            newCollec[keys[i]] = callback(collec[keys[i]], keys[i], collec);
+            if (isArray) {
+                newCollec.push(callback(collec[keys[i]], keys[i], collec));
+            } else if (isString) {
+                newCollec += callback(collec[keys[i]], keys[i], collec)
+            } else {
+                newCollec[keys[i]] = callback(collec[keys[i]], keys[i], collec);
+            }
         }
         return newCollec;
     }
     
     reduce(collec, callback) {
         let keys = this.keys(collec);
-        let startValue = collec[keys[0]];
+        let oldValue = collec[keys[0]];
         for (let i = 1; i < keys.length; i++) {
-            startValue = callback(startValue, collec[keys[i]], collec);
+            oldValue = callback(oldValue, collec[keys[i]], collec);
         }
-        return startValue;
+        return oldValue;
     }
     
     reduceRight(collec, callback) {
         let keys = this.keys(collec);
-        let startValue = collec[keys[keys.length - 1]];
+        let oldValue = collec[keys[keys.length - 1]];
         for (let i = keys.length - 2; i >= 0; i--) {
-            startValue = callback(startValue, collec[keys[i]], collec);
+            oldValue = callback(oldValue, collec[keys[i]], collec);
         }
-        return startValue;
+        return oldValue;
     }
     
     find(collec, callback) {
@@ -214,19 +231,28 @@ class Outpost {
     where(arr, obj) {
         let newArr = [];
         let keys = this.keys(obj);
+        let self = this;
+        
         this.forEach(arr, function(el) {
-            let canIAdd = true;
-            for (let i = 0; i < keys.length; i++) {
-                if (el[keys[i]] !== obj[keys[i]]) {
-                    canIAdd = false;
-                    break;
+            if (typeof el == "object") {
+                let canIAdd = true;
+                for (let i = 0; i < keys.length; i++) {
+                    if (el[keys[i]] !== obj[keys[i]]) {
+                        canIAdd = false;
+                        break;
+                    }
+                }
+                
+                if (canIAdd) {
+                    newArr.push(el);
+                }
+            } else {
+                if (self.isEqual(el, obj)) {
+                    newArr.push(el);
                 }
             }
-            
-            if (canIAdd) {
-                newArr.push(el);
-            }
         });
+        
         return newArr;
     }
     
@@ -266,14 +292,21 @@ class Outpost {
     }
     
     invoke() {
-        let args = arguments;
-        let arr = args[0];
-        this.forEach(arr, function(el, index) {
-            for (let i = 1; i < args.length; i++) {
-                arr[index] = this[args[i]]();
-            }
-        });
-        return arr;
+        let args = arguments[0];
+        let startVal = 1;
+        if (this.isFunction(args)) {
+            startVal--;
+            args = null;
+        }
+        let result = [];
+        for (let i = startVal; i < arguments.length; i++) {
+             if (args === null) {
+                result.push(arguments[i]());
+             } else {
+                result.push(arguments[i](args));
+             }
+        }
+        return result;
     }
     
     extend() {
@@ -289,7 +322,7 @@ class Outpost {
     }
     
     has(collec, key) {
-        return this.isContains(keys(collec), key);
+        return this.isContains(this.keys(collec), key);
     }
     
     forEach(o, callback) {
@@ -299,7 +332,7 @@ class Outpost {
                 ret = callback(o[i], i, o);
                 if (ret === true) break;
             }
-        }else if (this.isIterable(o)) {
+        } else {
             let keys = this.keys(o);
             for (let i = 0; i < keys.length; i++) {
                 const ret = callback(o[keys[i]], keys[i], o);
